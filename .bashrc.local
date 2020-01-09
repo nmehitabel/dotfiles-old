@@ -1,0 +1,49 @@
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+    *) return;;
+esac
+
+# Basic variables
+: ${HOME=~}
+: ${LOGNAME=$(id -un)}
+: ${UNAME=$(uname)}
+# See https://specifications.freedesktop.org/basedir-spec/latest/
+: ${XDG_CONFIG_HOME=$HOME/.config}
+: ${XDG_DATA_HOME=$HOME/.local/share}
+: ${XDG_CACHE_HOME=$HOME/.cache}
+export XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME
+
+# Local configuration
+BASH_CUSTOM_CONFIG_DIR=$XDG_CONFIG_HOME/bash/custom
+COMMON_CONFIG_DIR=$XDG_CONFIG_HOME/shell
+COMMON_CUSTOM_CONFIG_DIR=$COMMON_CONFIG_DIR
+# complete hostnames from this file
+: ${HOSTFILE=~/.ssh/known_hosts}
+
+HISTSIZE=10000
+HISTFILESIZE=20000
+
+
+### Additional commands from installed stuff
+
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin":$PATH
+fi
+
+# Load pyenv automatically 
+if [ ! -n "$(which pyenv)" ]; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+  export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+fi
+#
+
+#direnv
+if [ ! -n "$(which direnv)" ]; then
+  eval "$(direnv hook $(basename $SHELL))"
+  # export DIRENV_WARN_TIMEOUT=100s
+fi
+
