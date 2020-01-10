@@ -5,7 +5,7 @@ case $- in
     *) return;;
 esac
 
-# Basic variables
+### Basic variables
 : ${HOME=~}
 : ${LOGNAME=$(id -un)}
 : ${UNAME=$(uname)}
@@ -15,35 +15,120 @@ esac
 : ${XDG_CACHE_HOME=$HOME/.cache}
 export XDG_CONFIG_HOME XDG_DATA_HOME XDG_CACHE_HOME
 
-# Local configuration
+### Local configuration
 BASH_CUSTOM_CONFIG_DIR=$XDG_CONFIG_HOME/bash/custom
 COMMON_CONFIG_DIR=$XDG_CONFIG_HOME/shell
 COMMON_CUSTOM_CONFIG_DIR=$COMMON_CONFIG_DIR
+
 # complete hostnames from this file
 : ${HOSTFILE=~/.ssh/known_hosts}
 
+### Shell Options
+shopt -s extglob                 >/dev/null 2>&1  # extended pattern matching
+shopt -s hostcomplete            >/dev/null 2>&1  # perform hostname completion
+
+umask 0022
+
+### aliases
+
+### environment
+# detect interactive shell
+case "$-" in
+    *i*) INTERACTIVE=yes ;;
+    *)   unset INTERACTIVE ;;
+esac
+
+# detect login shell
+case "$0" in
+    -*) LOGIN=yes ;;
+    *)  unset LOGIN ;;
+esac
+
+### PATH functions
+
+pathadd() {
+    if [ -d "$1" ] && ! echo $PATH | grep -E -q "(^|:)$1($|:)" ; then
+        [ "$2" = "after" ] && PATH="$PATH:${1%/}" || PATH="${1%/}:$PATH"
+    fi
+}
+
+pathrm() {
+    PATH="$(echo $PATH | sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
+}
+
+######
+# Remove duplicate entries from a PATH style value while retaining
+# the original order.
+# Usage: puniq [<path>]
+#
+# Example:
+#   $ puniq /usr/bin:/usr/local/bin:/usr/bin
+#   /usr/bin:/usr/local/bin
+###
+puniq () {
+    echo "$1" |tr : '\n' |nl |sort -u -k 2,2 |sort -n |
+        cut -f 2- |tr '\n' : |sed -e 's/:$//' -e 's/^://'
+}
+
+# Complete default PATH eventually
+for bindir in /usr/local/bin $HOME/bin; do
+    pathadd ${bindir}
+done
+
+### PAGER / EDITOR
+# Default editor
+test -n "$(command -v vim)" && EDITOR=vim || EDITOR=nano
+export EDITOR
+
+# Default pager ('less' is 'more'...)
+if test -n "$(command -v less)" ; then
+    PAGER="less"
+else
+    PAGER=more
+fi
+
+MANPAGER="$PAGER"
+export PAGER MANPAGER
 HISTSIZE=10000
 HISTFILESIZE=20000
+# Add date and time to the history
+HISTTIMEFORMAT="[%d/%m/%Y %H:%M:%S] "
 
+### Load Eventually [custom] local configs (either .sh or .bash) 
+# - common to all shells (from ~/.config/shell/[custom/]*.sh typically)
+# - specific to bash (from ~/.config/bash/custom/*.sh typically)
+for d in \
+${COMMON_CONFIG_DIR} \
+${COMMON_CUSTOM_CONFIG_DIR} \
+${BASH_CUSTOM_CONFIG_DIR}
+do
+  if [ -d "${d}" ]; then
+    for f in ${d}/*.sh; do
+      [[ -r "$f" ]] && source $f
+    done
+    for f in ${d}/*.bash; do
+      [[ -r "$f" ]] && source $f
+    done
+  fi
+done
 
-### Additional commands from installed stuff
-
-if [ -d "$HOME/bin" ]; then
-    export PATH="$HOME/bin":$PATH
-fi
+### Additional commands from installed softwares
 
 # Load pyenv automatically 
 if [ ! -n "$(which pyenv)" ]; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
+  pathadd $HOME/.pyenv/bin
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
   export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 fi
 #
 
+# PATH
+PATH="$(puniq "$PATH")"
+
+export PATH
 #direnv
 if [ ! -n "$(which direnv)" ]; then
   eval "$(direnv hook $(basename $SHELL))"
   # export DIRENV_WARN_TIMEOUT=100s
 fi
-
