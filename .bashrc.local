@@ -77,7 +77,7 @@ done
 
 ### PAGER / EDITOR
 # Default editor
-test -n "$(command -v vim)" && EDITOR=vim || EDITOR=nano
+test -n "$(command -v vi)" && EDITOR=vi || EDITOR=nano
 export EDITOR
 
 # Default pager ('less' is 'more'...)
