@@ -26,3 +26,24 @@ shift "$(($OPTIND -1))"
 echo "sync to ${DEST:-''}"
 
 $(which rsync) ${DRY_RUN}  -avrc --files-from=./rsync-items.txt ./ "$DEST"
+
+#if rsync dry run don't do anything further
+if [ ! -z "$DRY_RUN" ]; then
+    echo "dry run - finish now"
+    exit 0
+fi
+
+# special treatment for .gitignore
+# exit if git.ignore file not in copy set
+[ $(grep -q git.ignore ./rsync-items.txt) ] && exit 0
+
+if [ -f "$DEST/.gitignore" ]; then
+    # if different to target .gitignore then rename over
+    if  ! cmp -s "$DEST/git.ignore" "$DEST/.gitignore" ;then
+        mv "$DEST/git.ignore" "$DEST/.gitignore"
+    fi
+else
+    mv "$DEST/git.ignore" "$DEST/.gitignore"
+fi
+
+[ -f "$DEST/git.ignore" ] && rm "$DEST/git.ignore"

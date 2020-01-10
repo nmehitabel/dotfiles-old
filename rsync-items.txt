@@ -1,3 +1,4 @@
 .bashrc.local
 .bash_profile
 .config
+git.ignore
