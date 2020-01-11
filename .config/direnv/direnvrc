@@ -57,7 +57,7 @@ layout_virtualenv() {
     local pyversion=$1
     local pvenv=$2
     pyenv local ${pyversion}
-    if [ -n "$(which pyenv-virtualenv)" ]; then
+    if [ -n "$(which pyenv virtualenv)" ]; then
         eval "$(pyenv virtualenv-init -)"
         pyenv virtualenv --force --quiet ${pyversion} ${pvenv}
     else 

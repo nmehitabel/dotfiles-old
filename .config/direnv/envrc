@@ -11,7 +11,7 @@
 #    curl -o .envrc https://raw.githubusercontent.com/Falkor/dotfiles/master/direnv/envrc
 
 # Default python version and virtualenv (basename of the root project directory)
-[ -f ".python-version" ]    && pyversion=$(head .python-version) || pyversion=3.7.4
+[ -f ".python-version" ]    && pyversion=$(head .python-version) || pyversion=3.7.6
 [ -f ".python-virtualenv" ] && pvenv=$(head  .python-virtualenv) || pvenv=$(basename $PWD)
 
 use python ${pyversion}

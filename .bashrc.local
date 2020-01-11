@@ -94,7 +94,7 @@ HISTFILESIZE=20000
 # Add date and time to the history
 HISTTIMEFORMAT="[%d/%m/%Y %H:%M:%S] "
 
-### Load Eventually [custom] local configs (either .sh or .bash) 
+### Load Eventually [custom] local configs (either .sh or .bash)
 # - common to all shells (from ~/.config/shell/[custom/]*.sh typically)
 # - specific to bash (from ~/.config/bash/custom/*.sh typically)
 for d in \
@@ -113,10 +113,11 @@ do
 done
 
 ### Additional commands from installed softwares
-
-# Load pyenv automatically 
-if [ ! -n "$(which pyenv)" ]; then
+if [ -d $HOME/.pyenv/bin ]; then
   pathadd $HOME/.pyenv/bin
+fi
+# Load pyenv automatically
+if [ -n "$(which pyenv)" ]; then
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
   export PYENV_VIRTUALENV_DISABLE_PROMPT=1
@@ -128,7 +129,7 @@ PATH="$(puniq "$PATH")"
 
 export PATH
 #direnv
-if [ ! -n "$(which direnv)" ]; then
+if [ -n "$(which direnv)" ]; then
   eval "$(direnv hook $(basename $SHELL))"
   # export DIRENV_WARN_TIMEOUT=100s
 fi

@@ -1,0 +1,99 @@
+# Linux dev machine set up
+#UTILITIES
+sudo apt install xclip
+sudo apt install fonts-firacode
+sudo apt install silversearcher-ag
+sudo apt install jq
+
+# pwsafe - todo replace with keepassxc???
+sudo apt install passwordsafe
+
+# nnn
+sudo apt-get install nnn
+#git flow
+sudo apt-get install git-flow
+
+#Docker
+# from https://docs.docker.com/install/linux/docker-ce/ubuntu/
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+sudo apt-key fingerprint 0EBFCD88
+
+# don't do
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+# instead until package released
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   disco \
+   stable"
+
+sudo apt update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo docker run hello-world
+
+#vscode
+## set up repository
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+
+## install
+sudo apt-get install apt-transport-https
+sudo apt-get update
+sudo apt-get install code
+
+
+#neovim
+sudo apt-get install neovim
+sudo apt-get install python3-neovim # should be installed with above
+sudo apt-get install python3-pip 
+python3 -m pip install --user --upgrade pynvim
+
+##vimplug
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+
+##config
+use :checkhealth in neovim
+
+
+### file $HOME/.config/nvim/init.vim
+
+
+#tmux
+sudo apt install tmux
+
+~/.tmux.conf # todo
+
+#pyenv
+# also installs pyenv-virtualenv
+# prequisites for building python (many should already be here)
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+
+curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+
+pyenv will be loaded autmatically by .bashrc.local
+
+#restart shell
+exec "$SHELL"
+
+#direnv
+sudo apt install direnv
+
+direnv configured and loaded by install.sh files
